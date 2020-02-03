@@ -1,10 +1,14 @@
 var express = require('express')
 var bodyParser = require('body-parser')
+var mongoose = require('mongoose')
+var Puntuacion  = require('./models/puntuacion')
 
 var app = express()
 app.use( bodyParser.urlencoded( {extended:false} ))
 app.use( bodyParser.json() )
 
+
+var PUERTO = 5200
 
 // Routes
 app.get("/", (req, res)=>{
@@ -12,38 +16,41 @@ app.get("/", (req, res)=>{
 })
 
 app.get("/puntuaciones", (req, res)=>{
-    //TODO: Leer de la base de datos
-    let datosJSON = {
-        accion: 'get all',
-        datos: [
-            {nombre : "Pepe", puntuacion:33},
-            {nombre : "Bea", puntuacion:23},
-            {nombre : "Felix", puntuacion:29}
-        ]
-    }
-    res.status(200).send( datosJSON )
+    Puntuacion.find().exec((err, puntuaciones)=>{
+        if(err) { res.status(500).send({accion:'get all', mensaje: 'Error al obtenet las puntuaciones'})}
+        else { res.status(200).send({accion:'get all', datos: puntuaciones}) }
+    })
 })
 
 app.post("/puntuacion", (req, res)=>{
     var datos = req.body;
-    console.log( "Nuevos datos ", datos)
-    //TODO: insertar en la base de datos
-    let datosRespuesta = {
-        accion: "save",
-        datos : datos
-    }
-    res.status(200).send(datosRespuesta)
+    var puntuacion = new Puntuacion()
+    puntuacion.nombre = datos.nombre
+    puntuacion.puntuacion = datos.puntuacion
+    puntuacion.save((err, result)=>{
+        if(err) { res.status(500).send({ accion: "save", mensaje:"Error al guardar la puntuacion"})}
+        else { res.status(200).send({ accion: "save", datos : result})}
+    })
 })
 
 app.delete("/puntuacion/:id", (req, res)=>{
-    let puntucacionId = req.params.id
-    let datosRespuesta = {
-        accion: "delete",
-        datos : puntucacionId
-    }
-    res.status(200).send( datosRespuesta )
+    let puntuacionId = req.params.id
+    Puntuacion.findByIdAndDelete(puntuacionId,(err, result)=>{
+        if(err) { res.status(500).send({ accion: "delete", mensaje:"Error al borrar la puntuacion"})}
+        else if(!result) { res.status(404).send({ accion: "delete", mensaje:"Error, no existe la puntuacion"})}
+        else { res.status(200).send({ accion: "delete", datos : result})}
+    })
 })
 
-app.listen(5200, ()=>{
-    console.log("API REST funcionando en localhost")
+mongoose.connect('mongodb://localhost:27017/scores', (err, res)=>{
+    if(err) {
+        console.log("Error de conexion a la base MongoDB")
+        throw err
+    }
+     console.log("Conectado con la base MongoDB")
+     
+    app.listen(PUERTO, ()=>{
+        console.log("API REST funcionando en localhost:" + PUERTO)
+    })
 })
+        
