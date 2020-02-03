@@ -1,0 +1,31 @@
+{
+  "name": "puntuacionesbackend",
+  "version": "1.0.0",
+  "description": "API BackEnd de aplicacion de puntuaciones",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "zalo": "echo \"Hola gonzalo\" & exit(-1)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gonAlonso/puntuacionesBackend.git"
+  },
+  "keywords": [
+    "api",
+    "node",
+    "puntuaciones",
+    "mondo",
+    "backend"
+  ],
+  "author": "Gonzalo Alonso Castro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gonAlonso/puntuacionesBackend/issues"
+  },
+  "homepage": "https://github.com/gonAlonso/puntuacionesBackend#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  }
+}
