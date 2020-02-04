@@ -22,6 +22,14 @@ app.get("/puntuaciones", (req, res)=>{
     })
 })
 
+app.get("/puntuacion/:id", (req, res)=>{
+    let id = req.params.id
+    Puntuacion.findById( id ).exec((err, puntuacion)=>{
+        if(err) { res.status(500).send({accion:'get all', mensaje: 'Error al obtenet las puntuaciones'})}
+        else { res.status(200).send({accion:'get all', datos: puntuacion}) }
+    })
+})
+
 app.post("/puntuacion", (req, res)=>{
     var datos = req.body;
     var puntuacion = new Puntuacion()
@@ -37,12 +45,22 @@ app.delete("/puntuacion/:id", (req, res)=>{
     let puntuacionId = req.params.id
     Puntuacion.findByIdAndDelete(puntuacionId,(err, result)=>{
         if(err) { res.status(500).send({ accion: "delete", mensaje:"Error al borrar la puntuacion"})}
-        else if(!result) { res.status(404).send({ accion: "delete", mensaje:"Error, no existe la puntuacion"})}
+        else if(!result) { res.status(404).send({ accion: "delete", mensaje:"Error, no existe el ID"})}
         else { res.status(200).send({ accion: "delete", datos : result})}
     })
 })
 
-mongoose.connect('mongodb://localhost:27017/scores', (err, res)=>{
+app.put("/puntuacion/:id", (req, res)=>{
+    let puntuacionId = req.params.id
+    var datos = req.body;
+    Puntuacion.findByIdAndUpdate(puntuacionId, datos, (err, result)=>{
+        if(err) { res.status(500).send({ accion: "update", mensaje:"Error al actualizar la puntuacion"})}
+        else if(!result) { res.status(404).send({ accion: "update", mensaje:"Error, no existe el ID"})}
+        else { res.status(200).send({ accion: "update", datos : result})}
+    })
+})
+
+mongoose.connect('mongodb://localhost:27018/scores', (err, res)=>{
     if(err) {
         console.log("Error de conexion a la base MongoDB")
         throw err
