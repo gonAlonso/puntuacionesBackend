@@ -34,6 +34,7 @@ async function getById(req, res) {
 
 async function insert(req, res) {
     var puntuacion = new Puntuacion( req.body )
+    puntuacion._id = undefined
     try {
         let puntuaciones = await puntuacion.save()
         res.status(200).send({accion:'save', datos: puntuaciones})
@@ -44,13 +45,15 @@ async function insert(req, res) {
 async function remove(req, res) {
     let puntuacionId = req.params.id
     try {
-        let res = await Puntuacion.findByIdAndDelete(puntuacionId)
-        if(!res) { res.status(500).send({ accion: "delete", mensaje:"Error: no existe el ID a borrar"}) }
-        else  res.status(200).send({ accion: "delete", datos : res})
+        let resp = await Puntuacion.findByIdAndDelete(puntuacionId)
+        if(!resp){
+            res.status(500).send({ accion: "delete", mensaje:"Error: no existe el ID a borrar"})
+            console.log("Error 1")
+        }
+        res.status(200).send({ accion: "delete", datos : resp})
+        console.log("OK")
     }
-    catch(e){ 
-        res.status(500).send({ accion: "delete", mensaje:"Error al borrar la puntuacion"})
-    }
+    catch(e) { res.status(500).send({ accion: "delete", mensaje:"Error al borrar la puntuacion"+e}) ; console.log("Error 2")}
 }
 
 async function update (req, res) {

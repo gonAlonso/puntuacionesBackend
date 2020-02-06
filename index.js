@@ -17,6 +17,12 @@ app.use(morgan('dev'))
 // Routes
 app.get("/", (req, res)=>{ res.status(200).send("API test OK") })
 
+
+//TODO: add usuarios
+//TODO: relaciones entre usuarios y puntuaciones
+//TODO: login (jwt) + login con google, facebook
+//TODO: validaciones
+
 // Todas las rutas que empiecen por /puntuacion se redirige al enrutador
 app.use('/puntuacion', routerPuntuacion )
 
