@@ -4,10 +4,10 @@ var mongoose = require('mongoose')
 var routerPuntuacion = require('./routes/puntuacion')
 var cors = require('cors')
 var morgan = require('morgan')
+var dotenv = require('dotenv')
 var app = express()
 
-var PUERTO = 5200
-
+dotenv.config()
 app.use( bodyParser.urlencoded( {extended:false} ))
 app.use( bodyParser.json() )
 
@@ -21,10 +21,10 @@ app.get("/", (req, res)=>{ res.status(200).send("API test OK") })
 app.use('/puntuacion', routerPuntuacion )
 
 const run = async()=> {
-    await mongoose.connect('mongodb://localhost:27018/scores',
+    await mongoose.connect(process.env.URL_BASE_DATOS,
         { useNewUrlParser: true , useUnifiedTopology: true})
-    await app.listen(PUERTO)
-    console.log("API REST funcionando en localhost:" + PUERTO)
+    await app.listen(process.env.PUERTO_SERVIDOR)
+    console.log("API REST funcionando en localhost:" + process.env.PUERTO_SERVIDOR)
 }
 
 run().catch(err=> console.error(`Fallo al arrancar servidor: ${err}`))

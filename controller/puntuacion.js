@@ -58,7 +58,8 @@ async function update (req, res) {
     var datos = req.body;
     try {
         let res = await Puntuacion.findByIdAndUpdate(puntuacionId, datos)
-        if(!res) { res.status(500).send({ accion: "delete", mensaje:"Error: no existe el ID a borrar"}) }
+        if(!res)
+            return res.status(500).send({ accion: "delete", mensaje:"Error: no existe el ID a borrar"}) 
         res.status(200).send({ accion: "update", datos : res})
     }
     catch(e){
