@@ -2,6 +2,7 @@ const Usuario  = require('../models/usuario')
 const Puntuacion  = require('../models/puntuacion')
 const Joi = require('@hapi/joi');
 const bcrypt = require('bcrypt');
+const mongoose  = require('mongoose')
 const jwt = require('jsonwebtoken')
 
 const schemaRegister = Joi.object({
@@ -96,7 +97,7 @@ async function login(req, res){ // Usaremos JsonWebToken
 
     res.header('auth-token', token)
     res.status(200).send(token)
-    //res.status(200).send({accion:'login', mensaje: `login OK`})
+    //res.status(200).send({accion:'login', token: token})
 }
 
 async function remove(req, res) {
@@ -127,20 +128,37 @@ async function update (req, res) {
     }
 }
 
+async function getPuntuacionesUsr(req, res){
+    try {
+        let usuario = await Usuario.findById( req.params.id ).populate('puntuaciones')
+        if( !usuario ) return res.status(500).send({accion:'login', mensaje: `Error 1 al buscar puntuaciones`})
+        res.status(200).send({ accion: "update", datos : usuario })
+    }
+    catch(e){
+        res.status(500).send({ accion: "update", mensaje: "Error al obtener las puntuaciones del usuario: " +e})
+    }
+}
+
 async function insertaPuntuacion(req, res){
-    
+    const session = await mongoose.startSession()
     let puntuacion = new Puntuacion( req.body )
-    let puntuacionGuardada = await puntuacion.save()
-    let usuarioEncontrado = await Usuario.findById( req.params.id )
-    usuarioEncontrado.puntuaciones.push( puntuacionGuardada )
-    await usuarioEncontrado.save()
-    res.status(200).send({ accion: "save", mensaje:"Puntuacion guardada: "})
+    try {
+        session.startTransaction()
+        let puntuacionGuardada = await puntuacion.save()
+        let usuarioEncontrado = await Usuario.findById( req.params.id )
+        usuarioEncontrado.puntuaciones.push( puntuacionGuardada )
+        await usuarioEncontrado.save()
+        await session.commitTransaction()
+        res.status(200).send({ accion: "save", mensaje:"Puntuacion guardada"})
+    } catch(e) {
+        await session.abortTransaction()
+        res.status(500).send({ accion: "save", mensaje:"Error al guardar la puntuacion"})
+    } finally {
+        session.endSession()
+    }
 }
-/*
-if(!usuario) return res.status(500).send({ accion: "delete", mensaje:"Error: no existe el ID del usuario solicitado"}) 
-}
-catch(e){ res.status(500).send({ accion: "update", mensaje:"Error al actualizar insertar puntuacion: "+e}) }
-*/
+
+
 module.exports = {
     getAll,
     getById,
@@ -148,5 +166,6 @@ module.exports = {
     remove,
     update,
     login,
-    insertaPuntuacion
+    insertaPuntuacion,
+    getPuntuacionesUsr
 }
