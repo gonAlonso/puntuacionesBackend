@@ -142,6 +142,7 @@ async function getPuntuacionesUsr(req, res){
 async function insertaPuntuacion(req, res){
     const session = await mongoose.startSession()
     let puntuacion = new Puntuacion( req.body )
+    puntuacion._id = undefined
     try {
         session.startTransaction()
         let puntuacionGuardada = await puntuacion.save()
@@ -152,7 +153,7 @@ async function insertaPuntuacion(req, res){
         res.status(200).send({ accion: "save", mensaje:"Puntuacion guardada"})
     } catch(e) {
         await session.abortTransaction()
-        res.status(500).send({ accion: "save", mensaje:"Error al guardar la puntuacion"})
+        res.status(500).send({ accion: "save", mensaje:"Error al guardar la puntuacion:" + e})
     } finally {
         session.endSession()
     }
